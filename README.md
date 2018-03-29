@@ -12,4 +12,7 @@ We hope to achieve the following goals:
 
 ## Issues
 
-## main.py
+## DicomReader.py
+Contains a function to read .dicom files from a directory into a 3D array. Also 
+contains a function to display the array in pyplot but cannot currently display 
+along the z axis.
