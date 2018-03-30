@@ -16,3 +16,14 @@ We hope to achieve the following goals:
 Contains a function to read .dicom files from a directory into a 3D array. Also 
 contains a function to display the array in pyplot but cannot currently display 
 along the z axis.
+
+## driver.py
+Is passed in a root directory containing patient info in each of their respective 
+subdirectories. Passes these patient folders to the DicomReader and trains the 
+neural network with the returned dicom array. Once sufficiently trained, the driver
+tests the neural network with random patient info and prints the predicted result and
+the expected result.
+
+## CNeuralNetwork.py
+Sets up the neural network with tensorflow and provides a method to train and test the 
+network. Also provides a function to return the loss array.
