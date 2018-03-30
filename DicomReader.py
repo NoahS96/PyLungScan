@@ -16,7 +16,7 @@ class DicomReader:
     #       Return a 3-dimensional array of the .dicom files in the provided directory
     def readFromDir(dirPath):
         filesDCM = []
-        for dirName, subdirList, fileList, in os.walk(dirPath):
+        for dirName, subdirList, fileList in os.walk(dirPath):
             for filename in fileList:
                 if '.dcm' in filename.lower():
                     filesDCM.append(os.path.join(dirName, filename))
