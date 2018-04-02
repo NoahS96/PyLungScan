@@ -44,9 +44,7 @@ class DicomReader:
         for filenameDCM in filesDCM:
             ds = dicom.read_file(filenameDCM)
             DicomArray[:, :, filesDCM.index(filenameDCM)] = ds.pixel_array
-        
-        print(dicom.read_file(filesDCM[0]))
-        print(DicomArray[0])
+       
         return DicomArray
         
     # show
