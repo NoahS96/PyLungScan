@@ -41,7 +41,7 @@ class DicomReader:
         DicomArray = np.zeros(ConstPixelDims, dtype=RefDicom.pixel_array.dtype)
 
         # Add the pixel data to the dicom array
-        for filenameDCM in filesDCM:
+        for filenameDCM in sorted(filesDCM):
             ds = dicom.read_file(filenameDCM)
             DicomArray[:, :, filesDCM.index(filenameDCM)] = ds.pixel_array
        
