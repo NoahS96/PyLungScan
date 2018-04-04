@@ -62,7 +62,7 @@ class DicomReader:
                 images[slice_index] = slope * images[slice_index].astype(np.float64)
                 images[slice_index] = images[slice_index].astype(np.int16)
 
-                images[slice_index] += np.int16(intercept)
+            images[slice_index] += np.int16(intercept)
 
         return np.array(images, dtype=np.int16)
 
