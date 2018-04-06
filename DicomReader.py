@@ -6,7 +6,8 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-#dirPath = './Data/LungCT-Diagnosis/R_004'
+from skimage import measure, morphology
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 class DicomReader:
 
@@ -77,20 +78,78 @@ class DicomReader:
     #   Purpose:
     #       When feeding the different patient images into a NN, the CT images may have different
     #       pixel spacings. The images need to have a standardized pixel spacing to be effective 
-    #       in the neural network. Resamples the pixel spacing to [1,1,1].
+    #       in the neural network. Resamples the pixel spacing to [1,1,1]. This function takes a 
+    #       while to complete due to the scipy interpolation.
     def resamplePixels(image, slices, new_spacing=[1,1,1]):
-        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float32)
-        cur_slice_thickness = np.array(slices[0].SliceThickness + 0.000, dtype=np.float32)
+        
+        # Create an array that represents the pixel spacing of x,y,z
+        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float64)
+        cur_slice_thickness = np.array(slices[0].SliceThickness, dtype=np.float64)
         spacing = np.append(cur_slice_thickness, cur_pixel_spacing)
 
-        print('resizing')
+        # Calculate the new resizing factor
         resizing_factor = spacing/new_spacing
         new_real_shape = image.shape * resizing_factor
         new_shape = np.round(new_real_shape)
         real_resize_factor = new_shape/image.shape
         new_spacing = spacing/real_resize_factor
 
-        print('Interpolation')
+        # Resize
         image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
         return image, new_spacing
 
+    # largestLabelVolume
+    #   Parameters:
+    #       image   -   Pixel array of patient
+    #       bg      -   Value to search for in array
+    #   Purpose:
+    #       Determine the largest label of air around the patient. This will be kept in the patient
+    #       image.
+    def largestLabelVolume(image, bg=-1):
+        vals, counts = np.unique(image, return_counts=True)
+
+        counts = counts[vals != bg]
+        vals = vals[vals != bg]
+
+        if len(counts) > 0:
+            return vals[np.argmax(counts)]
+        else:
+            return None
+
+    # segmentLungMask
+    #   Parameters:
+    #       image   -   Pixel array of patient
+    #       fill_lung_structures    -   Boolean value determining whether lungs in patient image
+    #           should be hollow or filled
+    #   Purpose:
+    #       Get a mask (i.e. image) of the lungs from the patient image.
+    def segmentLungMask(image, fill_lung_structures=True):
+
+        # -320 is the threshold determining which pixels are used
+        binary_image = np.array(image > -320, dtype=np.int8) + 1
+        labels = measure.label(binary_image)
+        
+        # Get the label of the air background
+        background_label = labels[0,0,0]
+        binary_image[background_label == labels] = 2
+
+        if fill_lung_structures:
+            for i, axial_slice in enumerate(binary_image):
+                axial_slice = axial_slice - 1
+                labeling = measure.label(axial_slice)
+                l_max = DicomReader.largest_label_volume(labeling, bg=0)
+
+                if  l_max is not None:
+                    binary_image[i][labeling != l_max] = 1
+        
+        # Make the image binary then invert the lung pixels
+        binary_image -= 1
+        binary_image = 1-binary_image
+
+        # Remove extra air pockets
+        labels = measure.label(binary_image, background=0)
+        l_max = DicomReader.largest_label_volume(labels, bg=0)
+        if l_max is not None:
+            binary_image[labels != l_max] = 0
+
+        return binary_image
