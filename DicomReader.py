@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pydicom as dicom
+import scipy.ndimage
 import os
 import numpy as np
 from matplotlib import pyplot as plt
@@ -77,18 +78,19 @@ class DicomReader:
     #       When feeding the different patient images into a NN, the CT images may have different
     #       pixel spacings. The images need to have a standardized pixel spacing to be effective 
     #       in the neural network. Resamples the pixel spacing to [1,1,1].
-    def resamplePixels(images, slices, new_spacing=[1,1,1]):
-        cur_pixel_spacing = np.array(scan[0].PixelSpacing)
-        spacing = np.array([slices[0].SliceThickness] + cur_pixel_spacing, dtype=np.float32)
+    def resamplePixels(image, slices, new_spacing=[1,1,1]):
+        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float32)
+        cur_slice_thickness = np.array(slices[0].SliceThickness + 0.000, dtype=np.float32)
+        spacing = np.append(cur_slice_thickness, cur_pixel_spacing)
 
-        #Currently has a shape error
+        print('resizing')
         resizing_factor = spacing/new_spacing
         new_real_shape = image.shape * resizing_factor
         new_shape = np.round(new_real_shape)
         real_resize_factor = new_shape/image.shape
         new_spacing = spacing/real_resize_factor
 
+        print('Interpolation')
         image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
-
         return image, new_spacing
 
