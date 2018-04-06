@@ -35,6 +35,7 @@ class DicomReader:
 
         return slices
 
+
     # covertHounsfield
     #   Parameters:
     #       slices  -   An array of dicom data from one patient
@@ -56,6 +57,7 @@ class DicomReader:
             intercept = slices[slice_index].RescaleIntercept
             slope = slices[slice_index].RescaleSlope
 
+            # Slope is generally 1 but occassionally is not
             if slope != 1:
 
                 # Multiply as a float for precision then convert back to int
@@ -66,6 +68,27 @@ class DicomReader:
 
         return np.array(images, dtype=np.int16)
 
+    
+    # resamplePixels
+    #   Parameters:
+    #       images  -   Images converted to Hounsfield unit pixels
+    #       slices  -   Array of Dicom images
+    #   Purpose:
+    #       When feeding the different patient images into a NN, the CT images may have different
+    #       pixel spacings. The images need to have a standardized pixel spacing to be effective 
+    #       in the neural network. Resamples the pixel spacing to [1,1,1].
+    def resamplePixels(images, slices, new_spacing=[1,1,1]):
+        cur_pixel_spacing = np.array(scan[0].PixelSpacing)
+        spacing = np.array([slices[0].SliceThickness] + cur_pixel_spacing, dtype=np.float32)
 
-        
+        #Currently has a shape error
+        resizing_factor = spacing/new_spacing
+        new_real_shape = image.shape * resizing_factor
+        new_shape = np.round(new_real_shape)
+        real_resize_factor = new_shape/image.shape
+        new_spacing = spacing/real_resize_factor
+
+        image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
+
+        return image, new_spacing
 
