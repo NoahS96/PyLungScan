@@ -6,7 +6,8 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-#dirPath = './Data/LungCT-Diagnosis/R_004'
+from skimage import measure, morphology
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 class DicomReader:
 
@@ -85,24 +86,26 @@ class DicomReader:
     #   Purpose:
     #       When feeding the different patient images into a NN, the CT images may have different
     #       pixel spacings. The images need to have a standardized pixel spacing to be effective 
-    #       in the neural network. Resamples the pixel spacing to [1,1,1].
+    #       in the neural network. Resamples the pixel spacing to [1,1,1]. This function takes a 
+    #       while to complete due to the scipy interpolation.
     def resamplePixels(image, slices, new_spacing=[1,1,1]):
-        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float32)
-        cur_slice_thickness = np.array(slices[0].SliceThickness + 0.000, dtype=np.float32)
+        
+        # Create an array that represents the pixel spacing of x,y,z
+        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float64)
+        cur_slice_thickness = np.array(slices[0].SliceThickness, dtype=np.float64)
         spacing = np.append(cur_slice_thickness, cur_pixel_spacing)
 
-        print('resizing')
+        # Calculate the new resizing factor
         resizing_factor = spacing/new_spacing
         new_real_shape = image.shape * resizing_factor
         new_shape = np.round(new_real_shape)
         real_resize_factor = new_shape/image.shape
         new_spacing = spacing/real_resize_factor
 
-        print('Interpolation')
+        # Resize
         image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
         return image, new_spacing
 
-<<<<<<< HEAD
     # largestLabelVolume
     #   Parameters:
     #       image   -   Pixel array of patient
@@ -158,5 +161,3 @@ class DicomReader:
             binary_image[labels != l_max] = 0
 
         return binary_image
-=======
->>>>>>> parent of 0b97688... Fixed shape issues again
