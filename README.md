@@ -13,16 +13,17 @@ We hope to achieve the following goals:
 ## Issues
 
 ## DicomReader.py
-Contains a function to read .dicom files from a directory into a 3D array. Also 
-contains a function to display the array in pyplot but cannot currently display 
-along the z axis.
+Contains a function to read .dicom files from a directory into a 3D array. Added 
+several other functions that convert the pixel data to hounsfield units and resamples
+the images for better NN processing. 
+Credit for said functions goes to Guido Zuidhof https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial
 
 ## driver.py
 Is passed in a root directory containing patient info in each of their respective 
-subdirectories. Passes these patient folders to the DicomReader and trains the 
-neural network with the returned dicom array. Once sufficiently trained, the driver
-tests the neural network with random patient info and prints the predicted result and
-the expected result.
+subdirectories and a path to a directory containing presampled images. Passes these 
+patient folders to the DicomReader and trains the neural network with the returned 
+dicom array. Once sufficiently trained, the driver tests the neural network with 
+random patient info and prints the predicted result and the expected result.
 
 ## CNeuralNetwork.py
 Sets up the neural network with tensorflow and provides a method to train and test the 
