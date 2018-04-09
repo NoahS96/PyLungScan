@@ -27,6 +27,10 @@ for dir_name, subdir, files in os.walk(patient_dir):
 # Check the ResampledImages directory for patient images that have already been 
 # processed. If not, add them to a processing list.
 print('Checking for unprocessed patient images in %s' % (resample_dir))
+<<<<<<< HEAD
+=======
+regex = re.compile('.*R_\d\d\d\.npy$')
+>>>>>>> 1bfb5f7c31fe7825b05e824ec5379ab80da6a3bc
 for dir_name, subdir, files in os.walk(resample_dir):
     for patient in patientPathArray:
         if patient.split('/')[-1] + '.npy' not in files:
@@ -36,11 +40,19 @@ for dir_name, subdir, files in os.walk(resample_dir):
 # Resample the images not found in the resampled directory.
 # This will take some time.
 for i in range(len(processPatientArray)):
+<<<<<<< HEAD
     patient_name = processPatientArray[i].split('/')[-1]
     print('[%d/%d]\tPatient %s' % (i+1, len(processPatientArray), patient_name)) 
 
     print('\tReading Slices...')
     slices = DicomReader.readFromDir(processPatientArray[i])
+=======
+    patient_name = patient.split('/')[-1]
+    print('[%d/%d] Patient %s' % (i+1, len(processPatientArray), patient_name)) 
+
+    print('\tReading Slices...')
+    slices = DicomReader.readFromDir(patient)
+>>>>>>> 1bfb5f7c31fe7825b05e824ec5379ab80da6a3bc
 
     print('\tConverting to hu...')
     image = DicomReader.convertHounsfield(slices)
@@ -50,8 +62,11 @@ for i in range(len(processPatientArray)):
 
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
+<<<<<<< HEAD
 
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
+=======
+>>>>>>> 1bfb5f7c31fe7825b05e824ec5379ab80da6a3bc
     np.save(resample_dir + '/' + patient_name, resampled_image)
 
 
