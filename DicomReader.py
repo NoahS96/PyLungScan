@@ -6,8 +6,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-from skimage import measure, morphology
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+#dirPath = './Data/LungCT-Diagnosis/R_004'
 
 class DicomReader:
 
@@ -26,10 +25,18 @@ class DicomReader:
         slices.sort(key = lambda x: float(x.ImagePositionPatient[2]))
 
         # get the distance between slices 
+        slice_thickness = 0
+        i = 0
         try:
-            slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
+            # Loop needed to make sure thickness is greater than 0 because some scans might have 
+            # slices with the same position.
+            while slice_thickness == 0 and i+1 < len(slices):
+                slice_thickness = np.abs(slices[i].ImagePositionPatient[2] - slices[i+1].ImagePositionPatient[2])
+                i += 1
         except:
-            slice_thickness = np.abs(slices[0].SliceLocation - slices[1].SliceLocation)
+            while slice_thickness == 0 and i+1 < len(slices):
+                slice_thickness = np.abs(slices[i].SliceLocation - slices[i+1].SliceLocation)
+                i += 1
 
         # set the slice thickness of each slice
         for s in slices:
@@ -78,26 +85,24 @@ class DicomReader:
     #   Purpose:
     #       When feeding the different patient images into a NN, the CT images may have different
     #       pixel spacings. The images need to have a standardized pixel spacing to be effective 
-    #       in the neural network. Resamples the pixel spacing to [1,1,1]. This function takes a 
-    #       while to complete due to the scipy interpolation.
+    #       in the neural network. Resamples the pixel spacing to [1,1,1].
     def resamplePixels(image, slices, new_spacing=[1,1,1]):
-        
-        # Create an array that represents the pixel spacing of x,y,z
-        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float64)
-        cur_slice_thickness = np.array(slices[0].SliceThickness, dtype=np.float64)
+        cur_pixel_spacing = np.array(slices[0].PixelSpacing, dtype=np.float32)
+        cur_slice_thickness = np.array(slices[0].SliceThickness + 0.000, dtype=np.float32)
         spacing = np.append(cur_slice_thickness, cur_pixel_spacing)
 
-        # Calculate the new resizing factor
+        print('resizing')
         resizing_factor = spacing/new_spacing
         new_real_shape = image.shape * resizing_factor
         new_shape = np.round(new_real_shape)
         real_resize_factor = new_shape/image.shape
         new_spacing = spacing/real_resize_factor
 
-        # Resize
+        print('Interpolation')
         image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
         return image, new_spacing
 
+<<<<<<< HEAD
     # largestLabelVolume
     #   Parameters:
     #       image   -   Pixel array of patient
@@ -137,7 +142,7 @@ class DicomReader:
             for i, axial_slice in enumerate(binary_image):
                 axial_slice = axial_slice - 1
                 labeling = measure.label(axial_slice)
-                l_max = DicomReader.largest_label_volume(labeling, bg=0)
+                l_max = DicomReader.largestLabelVolume(labeling, bg=0)
 
                 if  l_max is not None:
                     binary_image[i][labeling != l_max] = 1
@@ -148,8 +153,10 @@ class DicomReader:
 
         # Remove extra air pockets
         labels = measure.label(binary_image, background=0)
-        l_max = DicomReader.largest_label_volume(labels, bg=0)
+        l_max = DicomReader.largestLabelVolume(labels, bg=0)
         if l_max is not None:
             binary_image[labels != l_max] = 0
 
         return binary_image
+=======
+>>>>>>> parent of 0b97688... Fixed shape issues again

@@ -1,23 +1,67 @@
 import os
+import re
 import numpy as np
-from matplotlib import pyplot as plt
+import os, re
+from DicomReader import DicomReader
 
-##########################
-#       PSEUDOCODE       #
-##########################
-#
-# from DicomReader import DicomReader
-# from CNeuralNetwork import CNeuralNetwork
-#
+
+# still need to add the command line argument reader
 # rootDir = argv[0]
-# patientArr = None
-#
-# //Get an array of the patient directories from the data directory
-# //Directory structure is as follows ./LungCT-Diagnosis/R_0NN for some number NN
-# for dir, subdir, file in os.walk('./LungCT-Diagnosis'):
-#       patientArr = subdir
-#       break       
-#
+patient_dir = './LungCT-Diagnosis'
+resample_dir = './ResampledImages'
+
+patientPathArray = []       # Holds the paths to the patient image data directories
+processPatientArray = []    # Holds the paths to the unprocessed patient image directories
+
+
+# Get an array of the patient directories from the data directory
+# Directory structure is as follows ./LungCT-Diagnosis/R_0NN for some number NN
+# Store the path and patient names in separate arrays
+print('Gathering patient image directory %s' % (patient_dir))
+regex = re.compile('.*R_\d\d\d$')
+for dir_name, subdir, files in os.walk(patient_dir):
+    if re.match(regex, dir_name):
+        patientPathArray.append(dir_name)
+
+
+# Check the ResampledImages directory for patient images that have already been 
+# processed. If not, add them to a processing list.
+print('Checking for unprocessed patient images in %s' % (resample_dir))
+for dir_name, subdir, files in os.walk(resample_dir):
+    for patient in patientPathArray:
+        if patient.split('/')[-1] + '.npy' not in files:
+            processPatientArray.append(patient)
+
+
+# Resample the images not found in the resampled directory.
+# This will take some time.
+for i in range(len(processPatientArray)):
+    patient_name = processPatientArray[i].split('/')[-1]
+    print('[%d/%d]\tPatient %s' % (i+1, len(processPatientArray), patient_name)) 
+
+    print('\tReading Slices...')
+    slices = DicomReader.readFromDir(processPatientArray[i])
+
+    print('\tConverting to hu...')
+    image = DicomReader.convertHounsfield(slices)
+
+    print('\tResampling...')
+    resampled_image, new_spacing = DicomReader.resamplePixels(image, slices)
+
+    print('\tExtracting Lung Data...')
+    lungs = DicomReader.segmentLungMask(resampled_image, False)
+
+    print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
+    np.save(resample_dir + '/' + patient_name, resampled_image)
+
+
+# Walk throught the resample directory again and train the neural network with
+# the lung images.
+
+
+############
+#   TODO   #
+############
 # //For each patient, send the dicomArray to the CNN for training
 # for i in range(0, training_epochs):
 #       for patient in patientArr:
