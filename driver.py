@@ -51,8 +51,14 @@ for i in range(len(processPatientArray)):
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
 
+    print('\tAdding Padding Border...')
+    lungs = DicomReader.pad_with(lungs, 0)
+
+    print('\tNormalizing...')
+    lungs = DicomReader.normalize(lungs)
+    
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
-    np.save(resample_dir + '/' + patient_name, resampled_image)
+    np.save(resample_dir + '/' + patient_name, lungs)
 
 
 # Walk throught the resample directory again and train the neural network with
