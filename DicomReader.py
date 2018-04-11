@@ -82,7 +82,19 @@ class DicomReader:
 
         return np.array(images, dtype=np.int16)
 
-    
+
+    # downsize
+    #   Parameters:
+    #       slices  -   Patient Dicom slices
+    #       size    -   The size to set the image to 
+    def downsize(slices, size):
+        new_slices = []
+        for num, each_slice in enumerate(image):
+            new_image = cv2.resize(np.array(each_slice.pixel_array), (size, size))
+            new_slices.append(new_image)
+        return new_slices
+
+
     # resamplePixels
     #   Parameters:
     #       images  -   Images converted to Hounsfield unit pixels
