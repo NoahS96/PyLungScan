@@ -191,17 +191,17 @@ class DicomReader:
         y_value = int((size-shape[1])/2)
         z_value = int((size-shape[2])/2)
 
-        if int((size-shape[0]/2)%2) == 0:
+        if (size-shape[0])%2 == 0:
             x_set = (x_value, x_value)
         else:
-            x_set = (x_value+1, x_value)
+            x_set = (x_value, x_value+1)
 
-        if int((size-shape[1]/2)%2) == 0:
+        if (size-shape[1])%2 == 0:
             y_set = (y_value, y_value)
         else:
             y_set = (y_value, y_value+1)
 
-        if int((size-shape[2]/2)%2) == 0:
+        if (size-shape[2])%2 == 0:
             z_set = (z_value, z_value)
         else:
             z_set = (z_value, z_value+1)
