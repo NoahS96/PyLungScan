@@ -5,6 +5,7 @@ import os, re
 from DicomReader import DicomReader
 from ImageMath import ImageMath
 
+from matplotlib import pyplot as plt
 
 # still need to add the command line argument reader
 # rootDir = argv[0]
@@ -64,7 +65,7 @@ for i in range(len(processPatientArray)):
 
     print('\tNormalizing...')
     lungs = ImageMath.normalize(lungs)
-    
+
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
     np.save(resample_dir + '/' + patient_name, lungs)
 

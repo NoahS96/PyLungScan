@@ -7,7 +7,7 @@ class ImageMath:
     MAX_AXIS = 150
     MIN_BOUND = -1000.0
     MAX_BOUND = 400.0
-    SLICE_TARGET = 20
+    SLICE_TARGET = 50
 
     #chunks
     #   Parameters:
@@ -20,7 +20,7 @@ class ImageMath:
 
     #mean
     #   Parameters:
-    #
+    #       l   -   An array
     def mean(l):
         return sum(l)/len(l)
 
@@ -35,6 +35,19 @@ class ImageMath:
             chunk = list(map(ImageMath.mean, zip(*chunk)))
             new_image.append(chunk)
 
+        if len(new_image) != slice_target:
+            diff = slice_target - len(new_image)
+            
+            if diff < 0:
+                while len(new_image) != slice_target:
+                    new_val = list(map(mean, zip(*[new_image[slice_target-1], new_image[slice_target],])))
+                    del new_image[slice_target]
+                    new_image[slice_target-1] = new_val
+            else:
+                while len(new_image) != slice_target:
+                    new_image.append(new_image[-1])
+
+        print(len(new_image))
         return np.array(new_image, dtype=np.int16)
 
 
