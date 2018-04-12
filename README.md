@@ -14,8 +14,8 @@ We hope to achieve the following goals:
 
 ## DicomReader.py
 Contains a function to read .dicom files from a directory into a 3D array. Added 
-several other functions that convert the pixel data to hounsfield units and resamples
-the images for better NN processing. 
+several other functions that convert the pixel data to hounsfield units and extracts lung
+tissue from the images for better NN processing. 
 Credit for said functions goes to Guido Zuidhof https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial
 
 ## driver.py
@@ -24,6 +24,9 @@ subdirectories and a path to a directory containing presampled images. Passes th
 patient folders to the DicomReader and trains the neural network with the returned 
 dicom array. Once sufficiently trained, the driver tests the neural network with 
 random patient info and prints the predicted result and the expected result.
+
+## ImageMath.py
+Handles downsizing, chunking, and normalization of image arrays.
 
 ## CNeuralNetwork.py
 Sets up the neural network with tensorflow and provides a method to train and test the 
