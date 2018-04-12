@@ -1,18 +1,20 @@
-import os
-import re
-import numpy as np
 import os, re
+import numpy as np
+import argparse
 from DicomReader import DicomReader
 from ImageMath import ImageMath
 
-from matplotlib import pyplot as plt
 
-# still need to add the command line argument reader
-# rootDir = argv[0]
-patient_dir = './LungCT-Diagnosis'
-resample_dir = './ResampledImages'
+parser = argparse.ArgumentParser()
+parser.add_argument('--patients', '-p', type=str, help="Path to patient folders directory")
+parser.add_argument('--resampled', '-r', type=str, help="Path to directory with preprocessed images")
+parser.add_argument('--downsize', '-d', nargs='?', const=150, type=int, help="Value to size downsize the patient images to")
+args = parser.parse_args()
 
-downsize_shape = 150
+patient_dir = args.patients 
+resample_dir = args.resampled
+downsize_shape = args.downsize
+
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
 

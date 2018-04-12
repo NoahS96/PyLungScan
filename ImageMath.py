@@ -47,7 +47,6 @@ class ImageMath:
                 while len(new_image) != slice_target:
                     new_image.append(new_image[-1])
 
-        print(len(new_image))
         return np.array(new_image, dtype=np.int16)
 
 
