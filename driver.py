@@ -3,6 +3,7 @@ import re
 import numpy as np
 import os, re
 from DicomReader import DicomReader
+from ImageMath import ImageMath
 
 
 # still need to add the command line argument reader
@@ -10,6 +11,7 @@ from DicomReader import DicomReader
 patient_dir = './LungCT-Diagnosis'
 resample_dir = './ResampledImages'
 
+downsize_shape = 150
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
 
@@ -47,8 +49,9 @@ for i in range(len(processPatientArray)):
 
     #print('\tResampling...')
     #resampled_image, new_spacing = DicomReader.resamplePixels(image, slices)
+    
     print('\tDownsizing...')
-    resampled_image = DicomReader.downsize(image, 150)
+    resampled_image = ImageMath.downsize(image, downsize_shape)
 
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
@@ -57,7 +60,7 @@ for i in range(len(processPatientArray)):
     #lungs = DicomReader.pad_with(lungs, 0)
 
     print('\tNormalizing...')
-    lungs = DicomReader.normalize(lungs)
+    lungs = ImageMath.normalize(lungs)
     
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
     np.save(resample_dir + '/' + patient_name, lungs)
