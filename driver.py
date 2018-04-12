@@ -45,14 +45,16 @@ for i in range(len(processPatientArray)):
     print('\tConverting to hu...')
     image = DicomReader.convertHounsfield(slices)
 
-    print('\tResampling...')
-    resampled_image, new_spacing = DicomReader.resamplePixels(image, slices)
+    #print('\tResampling...')
+    #resampled_image, new_spacing = DicomReader.resamplePixels(image, slices)
+    print('\tDownsizing...')
+    resampled_image = DicomReader.downsize(image, 150)
 
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
 
-    print('\tAdding Padding Border...')
-    lungs = DicomReader.pad_with(lungs, 0)
+    #print('\tAdding Padding Border...')
+    #lungs = DicomReader.pad_with(lungs, 0)
 
     print('\tNormalizing...')
     lungs = DicomReader.normalize(lungs)

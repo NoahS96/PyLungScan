@@ -3,8 +3,8 @@
 import pydicom as dicom
 import scipy.ndimage
 import os
+import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 
 
 
@@ -91,10 +91,10 @@ class DicomReader:
     #       size    -   The size to set the image to 
     def downsize(slices, size):
         new_slices = []
-        for num, each_slice in enumerate(image):
-            new_image = cv2.resize(np.array(each_slice.pixel_array), (size, size))
-            new_slices.append(new_image)
-        return new_slices
+        for num, each_slice in enumerate(slices):
+            piece = cv2.resize(np.array(each_slice), (size, size))
+            new_slices.append(piece)
+        return np.array(new_slices)
 
 
     # resamplePixels
