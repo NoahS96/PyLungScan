@@ -53,6 +53,9 @@ for i in range(len(processPatientArray)):
     print('\tDownsizing...')
     resampled_image = ImageMath.downsize(image, downsize_shape)
 
+    print('\tReshaping Slices...')
+    resampled_image = ImageMath.chunkify(resampled_image)
+
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
 
@@ -64,7 +67,6 @@ for i in range(len(processPatientArray)):
     
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
     np.save(resample_dir + '/' + patient_name, lungs)
-
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.

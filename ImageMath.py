@@ -1,19 +1,42 @@
 import numpy as np
 import cv2
+import math
 
 class ImageMath:
 
     MAX_AXIS = 150
     MIN_BOUND = -1000.0
     MAX_BOUND = 400.0
+    SLICE_TARGET = 20
 
     #chunks
     #   Parameters:
     #       image   -   A numpy array   
     #       size    -   The size of chunks to return
     def chunks(image, size):
-        for i in range(0, len(image), n):
-            yield image[i:i + n]
+        for i in range(0, len(image), size):
+            yield image[i:i + size]
+
+
+    #mean
+    #   Parameters:
+    #
+    def mean(l):
+        return sum(l)/len(l)
+
+
+    #chunkify
+    #
+    def chunkify(image, slice_target=SLICE_TARGET):
+        chunk_size = math.ceil(len(image) / slice_target)
+        new_image = []
+
+        for chunk in ImageMath.chunks(image, chunk_size):
+            chunk = list(map(ImageMath.mean, zip(*chunk)))
+            new_image.append(chunk)
+
+        return np.array(new_image, dtype=np.int16)
+
 
     # pad_width
     #   Parameters:
@@ -50,6 +73,7 @@ class ImageMath:
  
         return new_image
 
+
     # normalize
     #   Parameters:
     #       image   -   A 3D dicom image
@@ -60,6 +84,7 @@ class ImageMath:
         image[image > 1] = 1.0
         image[image < 0] = 0.0
         return image
+
 
     # downsize
     #   Parameters:

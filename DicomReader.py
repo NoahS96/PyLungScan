@@ -126,6 +126,7 @@ class DicomReader:
         else:
             return None
 
+
     # segmentLungMask
     #   Parameters:
     #       image   -   Pixel array of patient
