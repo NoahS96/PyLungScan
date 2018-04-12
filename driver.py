@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os, re
 import numpy as np
 import argparse
@@ -8,12 +10,16 @@ from ImageMath import ImageMath
 parser = argparse.ArgumentParser()
 parser.add_argument('--patients', '-p', type=str, help="Path to patient folders directory")
 parser.add_argument('--resampled', '-r', type=str, help="Path to directory with preprocessed images")
-parser.add_argument('--downsize', '-d', nargs='?', const=150, type=int, help="Value to size downsize the patient images to")
+parser.add_argument('--downsize', '-d', nargs='?', default=150, type=int, help="Value to size downsize the patient images to")
+parser.add_argument('--tslices', '-ts', nargs='?', default=50, type=int, help="How many slices the image should be resampled to")
 args = parser.parse_args()
 
 patient_dir = args.patients 
 resample_dir = args.resampled
+slice_count = args.tslices
 downsize_shape = args.downsize
+
+print(slice_count, downsize_shape)
 
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
@@ -57,7 +63,7 @@ for i in range(len(processPatientArray)):
     resampled_image = ImageMath.downsize(image, downsize_shape)
 
     print('\tReshaping Slices...')
-    resampled_image = ImageMath.chunkify(resampled_image)
+    resampled_image = ImageMath.chunkify(resampled_image, slice_target=slice_count)
 
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
