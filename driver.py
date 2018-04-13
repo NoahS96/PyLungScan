@@ -2,6 +2,7 @@
 
 import os
 import numpy as np
+import pandas as pd
 import argparse
 from DicomReader import DicomReader
 from ImageMath import ImageMath
@@ -10,18 +11,21 @@ from ImageMath import ImageMath
 parser = argparse.ArgumentParser()
 parser.add_argument('--patients', '-p', type=str, help="Path to patient folders directory")
 parser.add_argument('--resampled', '-r', type=str, help="Path to directory with preprocessed images")
+parser.add_argument('--csv', '-c', type=str, help="Path to a csv file with patient id's and their diagnosis")
 parser.add_argument('--downsize', '-d', nargs='?', default=150, type=int, help="Value to size downsize the patient images to")
 parser.add_argument('--tslices', '-ts', nargs='?', default=50, type=int, help="How many slices the image should be resampled to")
 args = parser.parse_args()
 
 patient_dir = args.patients 
 resample_dir = args.resampled
+patients_csv = args.csv
 slice_count = args.tslices
 downsize_shape = args.downsize
 
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
 
+# Check if windows to set path splitter
 file_split = '/'
 if os.name =='nt':
     file_split = '\\'
@@ -78,6 +82,14 @@ for i in range(len(processPatientArray)):
     
     print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
     np.save(resample_dir + file_split + patient_name, lungs)
+
+# Get diagnosis labels from patient csv
+data = pd.read_csv(patients_csv)
+patient_diagnosis = {}
+print('Getting Patient Diagnosis From %s' % (patients_csv))
+for index, row in data.iterrows():
+    patient_diagnosis[row['id']] = row['cancer']
+
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.
