@@ -17,7 +17,7 @@ Arguments:
  * --downsize|-d : Optional argument specifying the desired shape of the processed images. Default: 150
  * --tslices|-ts : Optional argument specifying the desired slice count to resample the image to. Default:50
  
- Make sure the driver has the execute permission. Keep all patient folders in under a single directory and keep their corresponding diacom files in their appropriate patient folder. Create a directory for to store the .npy files of the processed images. Provide the -p and -r arguments and run. Currently, the driver only preprocessess the images.
+ Make sure the driver has the execute permission. Keep all patient folders under a single directory and keep their corresponding dicom files in their appropriate patient folder. Create a directory to store the .npy files of the processed images. Provide the -p and -r arguments and run. Currently, the driver only preprocessess the images.
 
 ### DicomReader.py
 Contains a function to read .dicom files from a directory into a 3D array. Added 
