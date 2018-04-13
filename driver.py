@@ -22,6 +22,10 @@ downsize_shape = args.downsize
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
 
+file_split = '/'
+if os.name =='nt':
+    file_split = '\\'
+
 
 # Get an array of the patient directories from the data directory
 # Directory structure is as follows ./LungCT-Diagnosis/R_0NN for some number NN
@@ -38,14 +42,14 @@ for dir_name, subdir, files in os.walk(patient_dir):
 print('Checking for unprocessed patient images in %s' % (resample_dir))
 for dir_name, subdir, files in os.walk(resample_dir):
     for patient in patientPathArray:
-        if patient.split('/')[-1] + '.npy' not in files:
+        if patient.split(file_split)[-1] + '.npy' not in files:
             processPatientArray.append(patient)
 
 
 # Resample the images not found in the resampled directory.
 # This will take some time.
 for i in range(len(processPatientArray)):
-    patient_name = processPatientArray[i].split('/')[-1]
+    patient_name = processPatientArray[i].split(file_split)[-1]
     print('[%d/%d]\tPatient %s' % (i+1, len(processPatientArray), patient_name)) 
 
     print('\tReading Slices...')
@@ -72,8 +76,8 @@ for i in range(len(processPatientArray)):
     print('\tNormalizing...')
     lungs = ImageMath.normalize(lungs)
     
-    print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
-    np.save(resample_dir + '/' + patient_name, lungs)
+    print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
+    np.save(resample_dir + file_split + patient_name, lungs)
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.
