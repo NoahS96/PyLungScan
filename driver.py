@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, re
+import os
 import numpy as np
 import argparse
 from DicomReader import DicomReader
@@ -19,8 +19,6 @@ resample_dir = args.resampled
 slice_count = args.tslices
 downsize_shape = args.downsize
 
-print(slice_count, downsize_shape)
-
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
 
@@ -29,9 +27,9 @@ processPatientArray = []    # Holds the paths to the unprocessed patient image d
 # Directory structure is as follows ./LungCT-Diagnosis/R_0NN for some number NN
 # Store the path and patient names in separate arrays
 print('Gathering patient image directory %s' % (patient_dir))
-regex = re.compile('.*R_\d\d\d$')
 for dir_name, subdir, files in os.walk(patient_dir):
-    if re.match(regex, dir_name):
+    if dir_name != patient_dir:
+        print(dir_name)
         patientPathArray.append(dir_name)
 
 
@@ -73,13 +71,12 @@ for i in range(len(processPatientArray)):
 
     print('\tNormalizing...')
     lungs = ImageMath.normalize(lungs)
-
+    
     print('\tWriting to %s' % (resample_dir + '/' + patient_name + '.npy'))
     np.save(resample_dir + '/' + patient_name, lungs)
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.
-
 
 ############
 #   TODO   #
