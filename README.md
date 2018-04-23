@@ -14,6 +14,7 @@ We hope to achieve the following goals:
 Arguments:
  * --patients|-p : Path to a directory of patient folders containing dicom files
  * --resampled|-r : Path to a directory of images already processed by the driver
+ * --csv|-c : Path to csv file containing patient ids (same id as in patients folder) and their diagnosis (1 for cancer or 0 for no cancer)
  * --downsize|-d : Optional argument specifying the desired shape of the processed images. Default: 150
  * --tslices|-ts : Optional argument specifying the desired slice count to resample the image to. Default:50
  
