@@ -50,6 +50,7 @@ class CNeuralNetwork:
 
         weights = { 'W_conv1':tf.Variable(tf.random_normal([3,3,3,1,32])), 
                     'W_conv2':tf.Variable(tf.random_normal([3,3,3,32,64])),
+                    #'W_fc':tf.Variable(tf.random_normal([neuron_count, 1024])),
                     'W_fc':tf.Variable(tf.random_normal([54080, 1024])),
                     'out':tf.Variable(tf.random_normal([1024, self.N_CLASSES]))}
 
@@ -68,7 +69,8 @@ class CNeuralNetwork:
         conv2 = self.__maxpool3d__(conv2)
 
         # Dense layer
-        fc = tf.reshape(conv2, [-1, neuron_count])
+        #fc = tf.reshape(conv2, [-1, neuron_count])
+        fc = tf.reshape(conv2, [-1, 54080])
         fc = tf.nn.relu(tf.matmul(fc, weights['W_fc']) + biases['b_fc'])
         fc = tf.nn.dropout(fc, self.keep_rate)
 
@@ -83,15 +85,15 @@ class CNeuralNetwork:
     #       patient_diagnosis   -   The value indicating whether a cancerous tumour is present  
     def train_neural_network(self, patient_data):
         prediction = self.__convolutional_neural_network__(self.x)
-        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.y))
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.LEARNING_RATE).minimize(cost)
 
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
 
             X = patient_data[0]
             Y = patient_data[1]
-            _, loss = sess.run([optimizer, cost], feed_dict={x:X, y:Y})
+            _, loss = sess.run([optimizer, cost], feed_dict={self.x:X, self.y:Y})
             
             return loss
 

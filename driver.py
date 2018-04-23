@@ -88,8 +88,7 @@ for i in range(len(processPatientArray)):
     lungs = ImageMath.normalize(lungs)
     
     try:
-        write_data = []
-        write_data.append([lungs, patient_diagnosis[patient_name]])
+        write_data = [lungs, patient_diagnosis[patient_name]]
     except KeyError:
         print('Skipping: Diagnosis not found for %s' % (patient_name))
         continue
