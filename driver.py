@@ -6,6 +6,7 @@ import pandas as pd
 import argparse
 from DicomReader import DicomReader
 from ImageMath import ImageMath
+from CNeuralNetwork import CNeuralNetwork
 
 
 parser = argparse.ArgumentParser()
@@ -62,9 +63,6 @@ for i in range(len(processPatientArray)):
     print('\tConverting to hu...')
     image = DicomReader.convertHounsfield(slices)
 
-    #print('\tResampling...')
-    #resampled_image, new_spacing = DicomReader.resamplePixels(image, slices)
-    
     print('\tDownsizing...')
     resampled_image = ImageMath.downsize(image, downsize_shape)
 
@@ -74,22 +72,26 @@ for i in range(len(processPatientArray)):
     print('\tExtracting Lung Data...')
     lungs = DicomReader.segmentLungMask(resampled_image, False)
 
-    #print('\tAdding Padding Border...')
-    #lungs = DicomReader.pad_with(lungs, 0)
-
     print('\tNormalizing...')
     lungs = ImageMath.normalize(lungs)
     
     print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
     np.save(resample_dir + file_split + patient_name, lungs)
 
+
 # Get diagnosis labels from patient csv
 data = pd.read_csv(patients_csv)
+
+# Dictionary of patients and their diagnosis: key(patient_id) : value(cancer_diagnosis)
 patient_diagnosis = {}
 print('Getting Patient Diagnosis From %s' % (patients_csv))
 for index, row in data.iterrows():
     patient_diagnosis[row['id']] = row['cancer']
 
+
+nn = CNeuralNetwork(downsize_shape, slice_count)
+loss = nn.train_neural_network(np.load('./ResampledImages/' + patientPathArray[0].split(file_split)[-1] + '.npy'), patient_diagnosis[patientPathArray[0].split(file_split)[-1]])
+print(loss)
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.
