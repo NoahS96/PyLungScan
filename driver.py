@@ -50,6 +50,18 @@ for dir_name, subdir, files in os.walk(resample_dir):
         if patient.split(file_split)[-1] + '.npy' not in files:
             processPatientArray.append(patient)
 
+# Get diagnosis labels from patient csv
+data = pd.read_csv(patients_csv)
+
+# Dictionary of patients and their diagnosis: key(patient_id) : value(cancer_diagnosis)
+patient_diagnosis = {}
+print('Getting Patient Diagnosis From %s' % (patients_csv))
+for index, row in data.iterrows():
+    if row['cancer'] == 0:
+        patient_diagnosis[row['id']] = np.array([1,0])
+    else:
+        patient_diagnosis[row['id']] = np.array([0,1])
+
 
 # Resample the images not found in the resampled directory.
 # This will take some time.
@@ -75,22 +87,19 @@ for i in range(len(processPatientArray)):
     print('\tNormalizing...')
     lungs = ImageMath.normalize(lungs)
     
+    try:
+        write_data = []
+        write_data.append([lungs, patient_diagnosis[patient_name]])
+    except KeyError:
+        print('Skipping: Diagnosis not found for %s' % (patient_name))
+        continue
+
     print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
-    np.save(resample_dir + file_split + patient_name, lungs)
-
-
-# Get diagnosis labels from patient csv
-data = pd.read_csv(patients_csv)
-
-# Dictionary of patients and their diagnosis: key(patient_id) : value(cancer_diagnosis)
-patient_diagnosis = {}
-print('Getting Patient Diagnosis From %s' % (patients_csv))
-for index, row in data.iterrows():
-    patient_diagnosis[row['id']] = row['cancer']
+    np.save(resample_dir + file_split + patient_name, write_data)
 
 
 nn = CNeuralNetwork(downsize_shape, slice_count)
-loss = nn.train_neural_network(np.load('./ResampledImages/' + patientPathArray[0].split(file_split)[-1] + '.npy'), patient_diagnosis[patientPathArray[0].split(file_split)[-1]])
+loss = nn.train_neural_network(np.load('./TestResampled/' + patientPathArray[3].split(file_split)[-1] + '.npy'))
 print(loss)
 
 # Walk throught the resample directory again and train the neural network with
