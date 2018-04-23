@@ -49,7 +49,7 @@ class CNeuralNetwork:
             * math.ceil((self.SLICE_COUNT/(2*self.N_CLASSES))) )
 
         weights = { 'W_conv1':tf.Variable(tf.random_normal([3,3,3,1,32])), 
-                    'W_conv2':tf.Variable(tf.random_normal([1,50,50,20,1])),
+                    'W_conv2':tf.Variable(tf.random_normal([3,3,3,32,64])),
                     'W_fc':tf.Variable(tf.random_normal([54080, 1024])),
                     'out':tf.Variable(tf.random_normal([1024, self.N_CLASSES]))}
 
@@ -64,7 +64,7 @@ class CNeuralNetwork:
         conv1 = self.__maxpool3d__(conv1)
 
         # Second convolutional layer
-        conv2 = tf.nn.relu(self.__conv3d__(x, weights['W_conv2']) + biases['b_conv2'])
+        conv2 = tf.nn.relu(self.__conv3d__(conv1, weights['W_conv2']) + biases['b_conv2'])
         conv2 = self.__maxpool3d__(conv2)
 
         # Dense layer
@@ -81,7 +81,7 @@ class CNeuralNetwork:
     #   Parameters:
     #       patient_image       -   The 3D patient chest scan image
     #       patient_diagnosis   -   The value indicating whether a cancerous tumour is present  
-    def train_neural_network(self, patient_image, patient_diagnosis):
+    def train_neural_network(self, patient_data):
         prediction = self.__convolutional_neural_network__(self.x)
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.y))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.LEARNING_RATE).minimize(cost)
@@ -89,8 +89,8 @@ class CNeuralNetwork:
         with tf.Session() as sess:
             sess.run(tf.initialize_all_variables())
 
-            X = patient_image
-            Y = patient_diagnosis
+            X = patient_data[0]
+            Y = patient_data[1]
             _, loss = sess.run([optimizer, cost], feed_dict={x:X, y:Y})
             
             return loss
