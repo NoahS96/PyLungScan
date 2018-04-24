@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import itertools
 import math
 
 class CNeuralNetwork:
@@ -93,13 +94,13 @@ class CNeuralNetwork:
 
             total_loss = 0
             num_runs = 0
-            backup_generator = patient_generator
+            patient_generator, epoch_generator = itertools.tee(patient_generator)
 
 
             for epoch in range(num_epochs):
                 epoch_loss = 0
 
-                patient_generator = backup_generator
+                epoch_generator, patient_generator  = itertools.tee(epoch_generator)
                 for patient in patient_generator:
                     X = patient[0]
                     Y = patient[1]

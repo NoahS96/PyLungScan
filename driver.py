@@ -15,6 +15,7 @@ parser.add_argument('--resampled', '-r', type=str, help="Path to directory with 
 parser.add_argument('--csv', '-c', type=str, help="Path to a csv file with patient id's and their diagnosis")
 parser.add_argument('--downsize', '-d', nargs='?', default=50, type=int, help="Value to size downsize the patient images to")
 parser.add_argument('--tslices', '-ts', nargs='?', default=20, type=int, help="How many slices the image should be resampled to")
+parser.add_argument('--epochs', '-e', nargs='?', default=10, type=int, help="How many training epochs to use")
 args = parser.parse_args()
 
 patient_dir = args.patients 
@@ -22,6 +23,7 @@ resample_dir = args.resampled
 patients_csv = args.csv
 slice_count = args.tslices
 downsize_shape = args.downsize
+epochs = args.epochs
 
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
@@ -111,8 +113,6 @@ def patient_generator(patient_array, resample_dir):
 # Running the CNN 
 print('Running CNN Now...')
 nn = CNeuralNetwork(downsize_shape, slice_count)
-print('Total loss: %.2f' % (nn.train_neural_network(patient_generator(patientPathArray, resample_dir), 10)))
+print('Total loss: %.2f' % (nn.train_neural_network(patient_generator(patientPathArray, resample_dir), epochs)))
 
-# Walk throught the resample directory again and train the neural network with
-# the lung images.
 
