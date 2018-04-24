@@ -111,7 +111,7 @@ def patient_generator(patient_array, resample_dir):
 # Running the CNN 
 print('Running CNN Now...')
 nn = CNeuralNetwork(downsize_shape, slice_count)
-print(nn.train_neural_network(patient_generator(patientPathArray, resample_dir), 10))
+print('Total loss: %.2f' % (nn.train_neural_network(patient_generator(patientPathArray, resample_dir), 10)))
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.

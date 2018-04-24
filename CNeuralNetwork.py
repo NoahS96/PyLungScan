@@ -83,7 +83,7 @@ class CNeuralNetwork:
     #   Parameters:
     #       patient_data    -   Numpy array with image at 0 and label at 1
     #       num_epochs      -   Number of training sessions
-    def train_neural_network(self, patient_data, num_epochs):
+    def train_neural_network(self, patient_generator, num_epochs):
         prediction = self.__convolutional_neural_network__(self.x)
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.LEARNING_RATE).minimize(cost)
@@ -93,13 +93,16 @@ class CNeuralNetwork:
 
             total_loss = 0
             num_runs = 0
+            backup_generator = patient_generator
+
 
             for epoch in range(num_epochs):
                 epoch_loss = 0
 
-                for data in patient_data:
-                    X = data[0]
-                    Y = data[1]
+                patient_generator = backup_generator
+                for patient in patient_generator:
+                    X = patient[0]
+                    Y = patient[1]
                     _, loss = sess.run([optimizer, cost], feed_dict={self.x:X, self.y:Y})
                 
                     epoch_loss += loss 
