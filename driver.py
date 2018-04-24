@@ -13,8 +13,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--patients', '-p', type=str, help="Path to patient folders directory")
 parser.add_argument('--resampled', '-r', type=str, help="Path to directory with preprocessed images")
 parser.add_argument('--csv', '-c', type=str, help="Path to a csv file with patient id's and their diagnosis")
-parser.add_argument('--downsize', '-d', nargs='?', default=150, type=int, help="Value to size downsize the patient images to")
-parser.add_argument('--tslices', '-ts', nargs='?', default=50, type=int, help="How many slices the image should be resampled to")
+parser.add_argument('--downsize', '-d', nargs='?', default=50, type=int, help="Value to size downsize the patient images to")
+parser.add_argument('--tslices', '-ts', nargs='?', default=20, type=int, help="How many slices the image should be resampled to")
 args = parser.parse_args()
 
 patient_dir = args.patients 
@@ -89,37 +89,30 @@ for i in range(len(processPatientArray)):
     
     try:
         write_data = [lungs, patient_diagnosis[patient_name]]
+        print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
+        np.save(resample_dir + file_split + patient_name, write_data)
     except KeyError:
         print('Skipping: Diagnosis not found for %s' % (patient_name))
-        continue
+        patientPathArray.remove(processPatientArray[i])
+        #if i+1 >= len(processPatientArray):
+        #    break
 
-    print('\tWriting to %s' % (resample_dir + file_split + patient_name + '.npy'))
-    np.save(resample_dir + file_split + patient_name, write_data)
+# patient_generator
+#   Parameters:
+#       patient_array   -   array of paths to patient folders
+#       resample_dir    -   directory of resampled images
+#   Purpose:
+#       Because the images are fairly large, we use a generator to pass them in as needed to 
+#       the neural network.
+def patient_generator(patient_array, resample_dir):
+    for patient in patient_array:
+        yield np.load('./' + resample_dir + patient.split(file_split)[-1] + '.npy')
 
-
+# Running the CNN 
+print('Running CNN Now...')
 nn = CNeuralNetwork(downsize_shape, slice_count)
-loss = nn.train_neural_network(np.load('./TestResampled/' + patientPathArray[3].split(file_split)[-1] + '.npy'))
-print(loss)
+print(nn.train_neural_network(patient_generator(patientPathArray, resample_dir), 10))
 
 # Walk throught the resample directory again and train the neural network with
 # the lung images.
 
-############
-#   TODO   #
-############
-# //For each patient, send the dicomArray to the CNN for training
-# for i in range(0, training_epochs):
-#       for patient in patientArr:
-#           dicomArray = DicomReader(patient)
-#           CNeuralNetwork.train(dicomArray)
-#
-# //For a random patient, send the dicomArray for a test diagnosis
-# for i in range(0, testing_epochs):
-#       randomIndex = np.random.randomint(0, len(patientArr))
-#       dicomArray = DicomReader(patientArr[randomIndex])
-#       result = CNeuralNetwork.diagnose(dicomArray)
-#       print(result)
-#
-# //Get the loss array from the Neural Network and display with matplotlib
-# loss = CNeuralNetwork.getLoss()
-# plt.show(loss)

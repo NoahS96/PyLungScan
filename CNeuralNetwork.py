@@ -81,9 +81,9 @@ class CNeuralNetwork:
     
     # train_neural_network
     #   Parameters:
-    #       patient_image       -   The 3D patient chest scan image
-    #       patient_diagnosis   -   The value indicating whether a cancerous tumour is present  
-    def train_neural_network(self, patient_data):
+    #       patient_data    -   Numpy array with image at 0 and label at 1
+    #       num_epochs      -   Number of training sessions
+    def train_neural_network(self, patient_data, num_epochs):
         prediction = self.__convolutional_neural_network__(self.x)
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.LEARNING_RATE).minimize(cost)
@@ -91,11 +91,24 @@ class CNeuralNetwork:
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
 
-            X = patient_data[0]
-            Y = patient_data[1]
-            _, loss = sess.run([optimizer, cost], feed_dict={self.x:X, self.y:Y})
+            total_loss = 0
+            num_runs = 0
+
+            for epoch in range(num_epochs):
+                epoch_loss = 0
+
+                for data in patient_data:
+                    X = data[0]
+                    Y = data[1]
+                    _, loss = sess.run([optimizer, cost], feed_dict={self.x:X, self.y:Y})
+                
+                    epoch_loss += loss 
+                    num_runs += 1
             
-            return loss
+                print('Epoch [', epoch+1, '/', num_epochs, '] : loss ', epoch_loss)
+                total_loss += epoch_loss
+
+            return total_loss
 
 
 
