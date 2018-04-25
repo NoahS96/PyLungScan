@@ -16,6 +16,7 @@ parser.add_argument('--csv', '-c', type=str, help="Path to a csv file with patie
 parser.add_argument('--downsize', '-d', nargs='?', default=50, type=int, help="Value to size downsize the patient images to")
 parser.add_argument('--tslices', '-ts', nargs='?', default=20, type=int, help="How many slices the image should be resampled to")
 parser.add_argument('--epochs', '-e', nargs='?', default=10, type=int, help="How many training epochs to use")
+parser.add_argument('--saver', '-s', nargs='?', type=str, help="Path to save a tensor training model save file")
 args = parser.parse_args()
 
 patient_dir = args.patients 
@@ -24,6 +25,7 @@ patients_csv = args.csv
 slice_count = args.tslices
 downsize_shape = args.downsize
 epochs = args.epochs
+saver = None
 
 patientPathArray = []       # Holds the paths to the patient image data directories
 processPatientArray = []    # Holds the paths to the unprocessed patient image directories
@@ -32,6 +34,15 @@ processPatientArray = []    # Holds the paths to the unprocessed patient image d
 file_split = '/'
 if os.name =='nt':
     file_split = '\\'
+
+if args.saver is not None:
+    saver = args.saver
+
+    #Create the file if it doesn't exist
+    if not os.path.isfile(saver):
+        print('Creating %s' % (saver))
+        fh = open(saver, 'w+')
+        fh.close()
 
 
 # Get an array of the patient directories from the data directory
@@ -112,7 +123,7 @@ def patient_generator(patient_array, resample_dir):
 
 # Running the CNN 
 print('Running CNN Now...')
-nn = CNeuralNetwork(downsize_shape, slice_count)
+nn = CNeuralNetwork(downsize_shape, slice_count, saver_path=saver)
 print('Total loss: %.2f' % (nn.train_neural_network(patient_generator(patientPathArray, resample_dir), epochs)))
 
 

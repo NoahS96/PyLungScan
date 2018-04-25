@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import itertools
-import math
+import math, os
 
 class CNeuralNetwork:
     PX_SIZE = 0
@@ -10,19 +10,21 @@ class CNeuralNetwork:
     BATCH_SIZE = 10
     LEARNING_RATE = 1e-3
     keep_rate = 0.8
+    saver_path = None
 
     x = tf.placeholder('float')
     y = tf.placeholder('float')
-
     
     # __init__
     #   Parameters:
     #       image_size  -   The number of pixels an image has along the x and y axis
     #       slice_count -   The number of images along the z axis
-    def __init__(self, image_size, slice_count):
+    #       saver_path  -   Location to save the training model
+    def __init__(self, image_size, slice_count, saver_path=None):
         self.PX_SIZE = image_size
         self.SLICE_COUNT = slice_count
-        
+        self.saver_path = saver_path
+
 
     # __conv3d__
     #   Parameters:
@@ -88,9 +90,19 @@ class CNeuralNetwork:
         prediction = self.__convolutional_neural_network__(self.x)
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.LEARNING_RATE).minimize(cost)
+        saver = tf.train.Saver()
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
+
+            # If a path is specified, try to open it and restore the training model. If it fails
+            # the file is empty so continue and save to it afterwards.
+            if self.saver_path is not None and os.path.isfile(self.saver_path):
+                try:
+                    saver.restore(sess, self.saver_path)
+                    print('Successfully restored training model')
+                except Exception:
+                    print('Couldn\'t restore from save path')
 
             total_loss = 0
             num_runs = 0
@@ -111,6 +123,10 @@ class CNeuralNetwork:
             
                 print('Epoch [', epoch+1, '/', num_epochs, '] : loss ', epoch_loss)
                 total_loss += epoch_loss
+
+                if self.saver_path is not None:
+                    print("Saving the training model")
+                    saver.save(sess, self.saver_path)
 
             return total_loss
 
