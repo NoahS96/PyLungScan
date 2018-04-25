@@ -54,4 +54,4 @@ Handles downsizing, chunking, and normalization of image arrays.
 
 ### CNeuralNetwork.py
 Sets up the neural network with tensorflow and provides a method to train and test the 
-network. Also provides a function to return the loss array.
+network. Also provides a function to return the loss. Can read in a tensor model save file.
