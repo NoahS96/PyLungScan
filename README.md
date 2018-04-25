@@ -17,6 +17,7 @@ Arguments:
  * --csv|-c : Path to csv file containing patient ids (same id as in patients folder) and their diagnosis (1 for cancer or 0 for no cancer)
  * --downsize|-d : Optional argument specifying the desired shape of the processed images. Default: 150
  * --tslices|-ts : Optional argument specifying the desired slice count to resample the image to. Default:50
+ * --saver|-s : Optional argument specifying the path to an existing tensorflow model or one to be created. First create a directory to save the file in then choose a name for the model file. Example: create directory TrainingModel the specify -s /TrainingModel/model.ckpt
  
  Make sure the driver has the execute permission. Keep all patient folders under a single directory and keep their corresponding dicom files in their appropriate patient folder. Create a directory to store the .npy files of the processed images. Provide the -p and -r arguments and run. Currently, the driver only preprocessess the images.
 
