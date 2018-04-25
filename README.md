@@ -10,6 +10,14 @@ We hope to achieve the following goals:
  * Achieve at least a 60 percent accuracy in diagnosis
  * Keep false positive occurances below 30 percent
 
+## Dependancies
+ * Tensorflow 1.5.1
+ * pydicom 1.0.2
+ * numpy 1.13.3
+ * pandas 0.20.3
+ * opencv 3.3.1
+ * scipy 1.0.1 
+
 ## How to use
 Arguments:
  * --patients|-p : Path to a directory of patient folders containing dicom files
@@ -20,6 +28,13 @@ Arguments:
  * --saver|-s : Optional argument specifying the path to an existing tensorflow model or one to be created. First create a directory to save the file in then choose a name for the model file. Example: create directory TrainingModel the specify -s /TrainingModel/model.ckpt
  
  Make sure the driver has the execute permission. Keep all patient folders under a single directory and keep their corresponding dicom files in their appropriate patient folder. Create a directory to store the .npy files of the processed images. Provide the -p and -r arguments and run. Currently, the driver only preprocessess the images.
+ 
+ Datasets can be found at:
+  * https://www.kaggle.com/c/data-science-bowl-2017/data
+  * https://wiki.cancerimagingarchive.net/display/Public/LungCT-Diagnosis (Note: There is no diagnosis csv file for this set)
+ 
+ Example:
+ ./driver.py -p SampleImages/ -r TestResampled/ -c stage1_labels.csv -s ./TrainingModel/model.ckpt -e 20
 
 ### DicomReader.py
 Contains a function to read .dicom files from a directory into a 3D array. Added 
