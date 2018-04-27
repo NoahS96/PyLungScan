@@ -36,6 +36,9 @@ Arguments:
   * https://www.kaggle.com/c/data-science-bowl-2017/data
   * https://wiki.cancerimagingarchive.net/display/Public/LungCT-Diagnosis (Note: There is no diagnosis csv file for this set)
 
+## Issues
+The driver may not read the patient image directories on Windows machines. The TrainingModel directory does not have the model.ckpt.data-00000-of-00001 file which is neccessary to load the existing training model (we could not upload this because it is >600MB). The program should be able to save and load new ckpt files though if you create on yourself. 
+
 ### DicomReader.py
 Contains a function to read .dicom files from a directory into a 3D array. Added 
 several other functions that convert the pixel data to hounsfield units and extracts lung
